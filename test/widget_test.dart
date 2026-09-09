@@ -148,10 +148,7 @@ void main() {
     await tester.tap(find.byKey(const Key('tool_card_protractor')));
     await tester.pumpAndSettle();
 
-    expect(
-      find.textContaining('با کشیدن انگشت روی صفحه'),
-      findsOneWidget,
-    );
+    expect(find.textContaining('با کشیدن انگشت روی صفحه'), findsOneWidget);
 
     await tester.drag(
       find.byKey(const Key('protractor_dial')),
@@ -178,10 +175,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(
-      find.textContaining('کالیبره کردن'),
-      findsWidgets,
-    );
+    expect(find.textContaining('کالیبره کردن'), findsWidgets);
     expect(tester.takeException(), isNull);
   });
 
@@ -206,10 +200,7 @@ void main() {
         await tester.pump();
         await tester.pump(const Duration(seconds: 6));
 
-        expect(
-          find.byKey(const Key('permission_action')),
-          findsOneWidget,
-        );
+        expect(find.byKey(const Key('permission_action')), findsOneWidget);
         expect(tester.takeException(), isNull);
       },
     );
@@ -226,10 +217,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 6));
 
-    expect(
-      find.textContaining('چراغ‌قوه'),
-      findsWidgets,
-    );
+    expect(find.textContaining('چراغ‌قوه'), findsWidgets);
     expect(tester.takeException(), isNull);
   });
 
@@ -244,10 +232,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(
-      find.textContaining('قطب‌نما'),
-      findsWidgets,
-    );
+    expect(find.textContaining('قطب‌نما'), findsWidgets);
     expect(tester.takeException(), isNull);
   });
 
@@ -494,9 +479,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      tester.widget<SwitchListTile>(
-        find.byKey(const Key('settings_toggle_show_recent')),
-      ).value,
+      tester
+          .widget<SwitchListTile>(
+            find.byKey(const Key('settings_toggle_show_recent')),
+          )
+          .value,
       isTrue,
     );
 
@@ -531,7 +518,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('حریم خصوصی'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('هیچ داده‌ای از دستگاه شما'), findsOneWidget);
+    expect(
+      find.textContaining('دریافت تبلیغات و ارسال فرم‌های پشتیبانی'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Settings: contact tile fails gracefully without a mail app '

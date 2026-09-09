@@ -1,5 +1,6 @@
 /// Keep in sync with the `version:` field in pubspec.yaml.
 const String kAppVersion = '1.0.0';
+const String kBazaarUrl = 'https://cafebazaar.ir/app/com.parsik.toolbax';
 
 const String kContactEmail = 'devteam.parsikhesab@gmail.com';
 

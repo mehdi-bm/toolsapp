@@ -27,12 +27,13 @@ class _TextCounterPageState extends State<TextCounterPage> {
   Widget build(BuildContext context) {
     return ToolScaffold(
       tool: widget.tool,
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(
+            SizedBox(
+              height: 220,
               child: TextField(
                 key: const Key('text_counter_input'),
                 controller: _controller,
@@ -70,13 +71,10 @@ class _StatsGrid extends StatelessWidget {
       crossAxisCount: 2,
       mainAxisSpacing: 12,
       crossAxisSpacing: 12,
-      childAspectRatio: 2.4,
+      mainAxisExtent: 24 + MediaQuery.textScalerOf(context).scale(104),
       children: [
         _StatTile(label: 'حروف', value: stats.characters),
-        _StatTile(
-          label: 'حروف بدون فاصله',
-          value: stats.charactersNoSpaces,
-        ),
+        _StatTile(label: 'حروف بدون فاصله', value: stats.charactersNoSpaces),
         _StatTile(label: 'کلمات', value: stats.words),
         _StatTile(label: 'خطوط', value: stats.lines),
       ],

@@ -70,7 +70,8 @@ class _TextToSpeechView extends StatefulWidget {
   State<_TextToSpeechView> createState() => _TextToSpeechViewState();
 }
 
-class _TextToSpeechViewState extends State<_TextToSpeechView> {
+class _TextToSpeechViewState extends State<_TextToSpeechView>
+    with WidgetsBindingObserver {
   final FlutterTts _tts = FlutterTts();
   final TextEditingController _controller = TextEditingController();
   bool _isSpeaking = false;
@@ -80,6 +81,7 @@ class _TextToSpeechViewState extends State<_TextToSpeechView> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initTts();
   }
 
@@ -101,6 +103,9 @@ class _TextToSpeechViewState extends State<_TextToSpeechView> {
       _tts.setCompletionHandler(() {
         if (mounted) setState(() => _isSpeaking = false);
       });
+      _tts.setErrorHandler((_) {
+        if (mounted) setState(() => _isSpeaking = false);
+      });
     } catch (_) {
       persianReady = false;
     }
@@ -112,6 +117,7 @@ class _TextToSpeechViewState extends State<_TextToSpeechView> {
   }
 
   Future<void> _speak() async {
+    if (_checkingVoice) return;
     final String text = _controller.text.trim();
     if (text.isEmpty) return;
     setState(() => _isSpeaking = true);
@@ -137,8 +143,14 @@ class _TextToSpeechViewState extends State<_TextToSpeechView> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) _stop();
+  }
+
+  @override
   void dispose() {
-    _tts.stop();
+    WidgetsBinding.instance.removeObserver(this);
+    _stop();
     _controller.dispose();
     super.dispose();
   }
@@ -180,7 +192,11 @@ class _TextToSpeechViewState extends State<_TextToSpeechView> {
           const SizedBox(height: 12),
           FilledButton.icon(
             key: const Key('tts_toggle_action'),
-            onPressed: _isSpeaking ? _stop : _speak,
+            onPressed: _checkingVoice
+                ? null
+                : _isSpeaking
+                ? _stop
+                : _speak,
             icon: Icon(
               _isSpeaking ? Icons.stop_rounded : Icons.volume_up_rounded,
             ),
@@ -212,7 +228,8 @@ class _SpeechToTextBody extends StatefulWidget {
   State<_SpeechToTextBody> createState() => _SpeechToTextBodyState();
 }
 
-class _SpeechToTextBodyState extends State<_SpeechToTextBody> {
+class _SpeechToTextBodyState extends State<_SpeechToTextBody>
+    with WidgetsBindingObserver {
   // Requested explicitly on every listen() call regardless of whether the
   // device's recognizer advertises it in locales() — that list is often
   // just the offline-pack subset and excludes languages the online/cloud
@@ -225,10 +242,12 @@ class _SpeechToTextBodyState extends State<_SpeechToTextBody> {
   bool _isListening = false;
   bool _persianListed = false;
   String _transcript = '';
+  String? _error;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initSpeech();
   }
 
@@ -249,7 +268,11 @@ class _SpeechToTextBodyState extends State<_SpeechToTextBody> {
             },
             onError: (_) {
               if (!mounted) return;
-              setState(() => _isListening = false);
+              setState(() {
+                _isListening = false;
+                _error =
+                    'گفتار دریافت نشد. اتصال اینترنت و سرویس گفتار گوشی را بررسی و دوباره تلاش کنید.';
+              });
             },
           )
           .timeout(const Duration(seconds: 5));
@@ -272,11 +295,13 @@ class _SpeechToTextBodyState extends State<_SpeechToTextBody> {
 
   Future<void> _toggleListening() async {
     if (_isListening) {
-      await _speech.stop();
-      if (mounted) setState(() => _isListening = false);
+      await _stopSafely();
       return;
     }
-    setState(() => _isListening = true);
+    setState(() {
+      _isListening = true;
+      _error = null;
+    });
     try {
       await _speech.listen(
         onResult: (SpeechRecognitionResult result) {
@@ -302,8 +327,23 @@ class _SpeechToTextBodyState extends State<_SpeechToTextBody> {
   void _clear() => setState(() => _transcript = '');
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) _stopSafely();
+  }
+
+  Future<void> _stopSafely() async {
+    try {
+      await _speech.stop();
+    } catch (_) {
+      /* Recognizer already stopped. */
+    }
+    if (mounted) setState(() => _isListening = false);
+  }
+
+  @override
   void dispose() {
-    _speech.stop();
+    WidgetsBinding.instance.removeObserver(this);
+    _stopSafely();
     super.dispose();
   }
 
@@ -332,6 +372,12 @@ class _SpeechToTextBodyState extends State<_SpeechToTextBody> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Text(
+            _error ??
+                'تشخیص گفتار ممکن است صدا را به سرویس گفتار گوشی ارسال کند و به اینترنت نیاز داشته باشد.',
+            style: theme.textTheme.bodySmall,
+          ),
+          const SizedBox(height: 8),
           if (!_persianListed)
             Padding(
               padding: const EdgeInsets.only(bottom: 12),

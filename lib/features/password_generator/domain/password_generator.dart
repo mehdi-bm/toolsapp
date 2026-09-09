@@ -34,8 +34,23 @@ String generatePassword({
     useSymbols: useSymbols,
   );
   if (pool.isEmpty || length <= 0) return '';
-  return List.generate(
-    length,
-    (_) => pool[random.nextInt(pool.length)],
-  ).join();
+  final groups = [
+    if (useUppercase) kUppercaseChars,
+    if (useLowercase) kLowercaseChars,
+    if (useNumbers) kNumberChars,
+    if (useSymbols) kSymbolChars,
+  ];
+  if (length < groups.length) {
+    throw ArgumentError.value(
+      length,
+      'length',
+      'Too short for selected groups',
+    );
+  }
+  final characters = [
+    for (final group in groups) group[random.nextInt(group.length)],
+    for (int i = groups.length; i < length; i++)
+      pool[random.nextInt(pool.length)],
+  ]..shuffle(random);
+  return characters.join();
 }

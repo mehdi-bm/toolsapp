@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -19,6 +21,11 @@ import 'features/settings/presentation/settings_cubit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  LicenseRegistry.addLicense(() async* {
+    yield LicenseEntryWithLineBreaks([
+      'Vazirmatn',
+    ], await rootBundle.loadString('assets/fonts/OFL.txt'));
+  });
   await setupServiceLocator();
   runApp(const ToolboxApp());
 }
@@ -36,9 +43,7 @@ class ToolboxApp extends StatelessWidget {
         BlocProvider(
           create: (_) => RecentToolsCubit(getIt<RecentToolsRepository>()),
         ),
-        BlocProvider(
-          create: (_) => SettingsCubit(getIt<SettingsRepository>()),
-        ),
+        BlocProvider(create: (_) => SettingsCubit(getIt<SettingsRepository>())),
         BlocProvider(
           create: (_) => AdBannerCubit(
             gateway: getIt<AdvertisingGateway>(),

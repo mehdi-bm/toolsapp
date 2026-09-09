@@ -47,9 +47,9 @@ class SettingsPage extends StatelessWidget {
   }
 
   void _showEmailFallback(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('ایمیل تماس: $kContactEmail')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('ایمیل تماس: $kContactEmail')));
   }
 
   Future<void> _contactUs(BuildContext context) async {
@@ -69,10 +69,16 @@ class SettingsPage extends StatelessWidget {
   Future<void> _shareApp(BuildContext context) async {
     try {
       await SharePlus.instance.share(
-        ShareParams(text: '$kAppDescription\n\n$kAppTagline'),
+        ShareParams(text: '$kAppDescription\n\n$kBazaarUrl'),
       );
     } catch (_) {
-      // Sharing is non-critical; silently ignore a platform-level failure.
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('اشتراک‌گذاری ممکن نشد. دوباره تلاش کنید.'),
+          ),
+        );
+      }
     }
   }
 
@@ -107,9 +113,7 @@ class SettingsPage extends StatelessWidget {
                 ],
                 selected: {state.themeMode},
                 onSelectionChanged: (selection) {
-                  context.read<SettingsCubit>().setThemeMode(
-                    selection.first,
-                  );
+                  context.read<SettingsCubit>().setThemeMode(selection.first);
                 },
               ),
               const SizedBox(height: 24),
@@ -118,7 +122,9 @@ class SettingsPage extends StatelessWidget {
                 key: const Key('settings_toggle_show_recent'),
                 contentPadding: EdgeInsets.zero,
                 title: const Text('نمایش ابزارهای اخیر'),
-                subtitle: const Text('بخش «آخرین ابزارهای استفاده‌شده» در خانه'),
+                subtitle: const Text(
+                  'بخش «آخرین ابزارهای استفاده‌شده» در خانه',
+                ),
                 value: state.showRecent,
                 onChanged: (value) =>
                     context.read<SettingsCubit>().setShowRecent(value),
@@ -143,9 +149,9 @@ class SettingsPage extends StatelessWidget {
                 leading: const Icon(Icons.apps_rounded),
                 title: const Text('درباره برنامه'),
                 trailing: const Icon(Icons.chevron_left_rounded),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const AboutPage()),
-                ),
+                onTap: () => Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (_) => const AboutPage())),
               ),
               ListTile(
                 contentPadding: EdgeInsets.zero,
@@ -153,9 +159,7 @@ class SettingsPage extends StatelessWidget {
                 title: const Text('حریم خصوصی'),
                 trailing: const Icon(Icons.chevron_left_rounded),
                 onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const PrivacyPolicyPage(),
-                  ),
+                  MaterialPageRoute(builder: (_) => const PrivacyPolicyPage()),
                 ),
               ),
               ListTile(

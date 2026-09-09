@@ -16,7 +16,8 @@ class ColorDetectorPage extends StatefulWidget {
   State<ColorDetectorPage> createState() => _ColorDetectorPageState();
 }
 
-class _ColorDetectorPageState extends State<ColorDetectorPage> {
+class _ColorDetectorPageState extends State<ColorDetectorPage>
+    with WidgetsBindingObserver {
   CameraController? _controller;
   bool _initializing = true;
   bool _cameraError = false;
@@ -24,12 +25,48 @@ class _ColorDetectorPageState extends State<ColorDetectorPage> {
   Color _liveColor = Colors.grey;
   Color? _sampledColor;
   DateTime _lastSampleTime = DateTime.fromMillisecondsSinceEpoch(0);
+  int _session = 0;
+  bool _foreground = true;
+  Future<void> _closing = Future<void>.value();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  Future<void> _release(CameraController? controller) async {
+    try {
+      await controller?.dispose();
+    } catch (_) {
+      /* Camera already closed. */
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    _foreground = state == AppLifecycleState.resumed;
+    if (!_foreground) {
+      _session++;
+      final controller = _controller;
+      _controller = null;
+      _closing = _closing.then((_) => _release(controller));
+      _initStarted = false;
+      _initializing = true;
+    }
+    if (mounted) setState(() {});
+  }
 
   // Only called from within the granted branch of PermissionGate's builder
   // (see _buildCameraBody) so the camera is never touched before permission
   // is confirmed.
   Future<void> _initCamera() async {
+    _cameraError = false;
+    final int session = ++_session;
+    CameraController? pending;
     try {
+      await _closing;
+      if (!mounted || !_foreground || session != _session) return;
       final List<CameraDescription> cameras = await availableCameras();
       if (cameras.isEmpty) {
         throw CameraException('noCamera', 'No camera found');
@@ -44,9 +81,10 @@ class _ColorDetectorPageState extends State<ColorDetectorPage> {
         enableAudio: false,
         imageFormatGroup: ImageFormatGroup.yuv420,
       );
+      pending = controller;
       await controller.initialize();
       await controller.startImageStream(_processImage);
-      if (!mounted) {
+      if (!mounted || !_foreground || session != _session) {
         await controller.dispose();
         return;
       }
@@ -55,7 +93,8 @@ class _ColorDetectorPageState extends State<ColorDetectorPage> {
         _initializing = false;
       });
     } catch (_) {
-      if (!mounted) return;
+      await _release(pending);
+      if (!mounted || session != _session) return;
       setState(() {
         _cameraError = true;
         _initializing = false;
@@ -94,12 +133,15 @@ class _ColorDetectorPageState extends State<ColorDetectorPage> {
 
     final double yVal = yPlane.bytes[yIndex].toDouble();
     final double uVal = uPlane.bytes[uvIndex].toDouble() - 128;
-    final double vVal = vPlane.bytes[uvIndex].toDouble() - 128;
+    final int vIndex =
+        (y ~/ 2) * vPlane.bytesPerRow + (x ~/ 2) * (vPlane.bytesPerPixel ?? 1);
+    final double vVal = vPlane.bytes[vIndex].toDouble() - 128;
 
     final int r = (yVal + 1.402 * vVal).round().clamp(0, 255);
-    final int g = (yVal - 0.344136 * uVal - 0.714136 * vVal)
-        .round()
-        .clamp(0, 255);
+    final int g = (yVal - 0.344136 * uVal - 0.714136 * vVal).round().clamp(
+      0,
+      255,
+    );
     final int b = (yVal + 1.772 * uVal).round().clamp(0, 255);
 
     return Color.fromARGB(255, r, g, b);
@@ -111,7 +153,9 @@ class _ColorDetectorPageState extends State<ColorDetectorPage> {
 
   @override
   void dispose() {
-    _controller?.dispose();
+    _session++;
+    WidgetsBinding.instance.removeObserver(this);
+    _release(_controller);
     super.dispose();
   }
 
@@ -131,7 +175,7 @@ class _ColorDetectorPageState extends State<ColorDetectorPage> {
   }
 
   Widget _buildCameraBody(BuildContext context) {
-    if (!_initStarted) {
+    if (!_initStarted && _foreground) {
       _initStarted = true;
       _initCamera();
     }
@@ -160,11 +204,9 @@ class _ColorDetectorPageState extends State<ColorDetectorPage> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        CameraPreview(_controller!),
+        Center(child: CameraPreview(_controller!)),
         const IgnorePointer(
-          child: Center(
-            child: Icon(Icons.add, color: Colors.white, size: 32),
-          ),
+          child: Center(child: Icon(Icons.add, color: Colors.white, size: 32)),
         ),
         Align(
           alignment: Alignment.bottomCenter,

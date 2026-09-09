@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_info.dart';
 import '../../../core/widgets/info_page_scaffold.dart';
+import '../../../core/widgets/app_logo.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -15,18 +16,7 @@ class AboutPage extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Icon(
-              Icons.handyman_rounded,
-              color: theme.colorScheme.primary,
-              size: 40,
-            ),
-          ),
+          const AppLogo(size: 80),
           const SizedBox(height: 16),
           Text(
             kAppName,
@@ -54,6 +44,15 @@ class AboutPage extends StatelessWidget {
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
+          ),
+          const SizedBox(height: 16),
+          TextButton(
+            onPressed: () => showLicensePage(
+              context: context,
+              applicationName: kAppName,
+              applicationVersion: kAppVersion,
+            ),
+            child: const Text('مجوزهای متن‌باز'),
           ),
         ],
       ),

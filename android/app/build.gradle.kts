@@ -8,8 +8,7 @@ plugins {
 }
 
 // Release signing comes from android/key.properties, which is gitignored and
-// not present on a fresh checkout — fall back to debug signing in that case
-// so the app still builds (just unsuitable for a real release).
+// not present on a fresh checkout. Never disguise a debug-signed APK as release.
 val keystorePropertiesFile = rootProject.file("key.properties")
 val keystoreProperties = Properties()
 val hasReleaseSigning = keystorePropertiesFile.exists()
@@ -28,7 +27,6 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.parsik.toolbax"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
@@ -36,6 +34,11 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        // Match the Flutter AOT targets used by the Bazaar release command.
+        ndk {
+            abiFilters.clear()
+            abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
+        }
     }
 
     signingConfigs {
@@ -53,8 +56,16 @@ android {
         release {
             signingConfig = if (hasReleaseSigning) {
                 signingConfigs.getByName("release")
-            } else {
-                signingConfigs.getByName("debug")
+            } else null
+        }
+    }
+}
+
+tasks.configureEach {
+    if (name == "validateSigningRelease" || name == "packageRelease" || name == "signReleaseBundle") {
+        doFirst {
+            check(hasReleaseSigning) {
+                "Release signing is required. Configure android/key.properties with your publishing keystore."
             }
         }
     }

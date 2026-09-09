@@ -6,6 +6,7 @@ import '../../../core/constants/tool_catalog.dart';
 import '../../../core/routing/tool_navigation.dart';
 import '../../../core/utils/tool_search.dart';
 import '../../../core/widgets/tool_card.dart';
+import '../../../core/widgets/app_logo.dart';
 import '../../advertising/presentation/ad_banner_cubit.dart';
 import '../../advertising/presentation/ad_banner_widget.dart';
 import '../../favorites/presentation/favorites_cubit.dart';
@@ -44,8 +45,6 @@ class _HomePageState extends State<HomePage> {
             children: [
               _buildHeader(theme),
               const SizedBox(height: 20),
-              const AdBannerWidget(),
-              const SizedBox(height: 20),
               _buildSearchField(theme),
               const SizedBox(height: 20),
               if (_query.trim().isNotEmpty)
@@ -54,6 +53,7 @@ class _HomePageState extends State<HomePage> {
                 _buildRecentSection(context, theme),
                 for (final ToolCategory category in ToolCategory.values)
                   _buildCategorySection(context, theme, category),
+                const AdBannerWidget(),
               ],
             ],
           ),
@@ -65,18 +65,7 @@ class _HomePageState extends State<HomePage> {
   Widget _buildHeader(ThemeData theme) {
     return Row(
       children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.primary.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Icon(
-            Icons.handyman_rounded,
-            color: theme.colorScheme.primary,
-            size: 28,
-          ),
-        ),
+        const AppLogo(size: 48),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -114,6 +103,7 @@ class _HomePageState extends State<HomePage> {
             ? null
             : IconButton(
                 icon: const Icon(Icons.close_rounded),
+                tooltip: 'پاک کردن جستجو',
                 onPressed: () {
                   _searchController.clear();
                   setState(() => _query = '');
@@ -234,7 +224,7 @@ class _ToolRow extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         SizedBox(
-          height: 168,
+          height: 110 + MediaQuery.textScalerOf(context).scale(58),
           child: BlocBuilder<FavoritesCubit, Set<String>>(
             builder: (context, favoriteIds) {
               return ListView.separated(

@@ -33,8 +33,10 @@ class _RootShellState extends State<RootShell> {
         body: IndexedStack(index: _currentIndex, children: _pages),
         bottomNavigationBar: NavigationBar(
           selectedIndex: _currentIndex,
-          onDestinationSelected: (index) =>
-              setState(() => _currentIndex = index),
+          onDestinationSelected: (index) {
+            FocusManager.instance.primaryFocus?.unfocus();
+            setState(() => _currentIndex = index);
+          },
           destinations: const [
             NavigationDestination(
               key: Key('nav_home'),

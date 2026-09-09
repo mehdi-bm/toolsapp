@@ -2,6 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:toolbax/features/text_counter/domain/text_stats.dart';
 
 void main() {
+  test('counts visible Unicode characters rather than UTF-16 units', () {
+    expect(computeTextStats('👨‍👩‍👧‍👦 👍🏽 e\u0301').characters, 5);
+    expect(computeTextStats('👨‍👩‍👧‍👦 👍🏽 e\u0301').charactersNoSpaces, 3);
+  });
   test('empty text has zero of everything', () {
     final TextStats stats = computeTextStats('');
 

@@ -34,11 +34,11 @@ class FavoritesPage extends StatelessWidget {
 
           return GridView.builder(
             padding: const EdgeInsets.all(16),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 240,
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
-              childAspectRatio: 0.82,
+              mainAxisExtent: 110 + MediaQuery.textScalerOf(context).scale(58),
             ),
             itemCount: favoriteTools.length,
             itemBuilder: (context, index) {

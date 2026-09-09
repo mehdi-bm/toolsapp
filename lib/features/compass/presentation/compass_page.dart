@@ -25,10 +25,16 @@ class _CompassPageState extends State<CompassPage> {
   MagnetometerEvent? _lastMag;
   double? _headingDegrees;
   bool _unavailable = false;
+  Timer? _readingTimeout;
 
   @override
   void initState() {
     super.initState();
+    _readingTimeout = Timer(const Duration(seconds: 5), () {
+      if (mounted && _headingDegrees == null) {
+        setState(() => _unavailable = true);
+      }
+    });
 
     _accelSubscription =
         accelerometerEventStream(
@@ -78,11 +84,15 @@ class _CompassPageState extends State<CompassPage> {
 
     double degrees = azimuth * 180 / math.pi;
     if (degrees < 0) degrees += 360;
-    setState(() => _headingDegrees = degrees);
+    setState(() {
+      _headingDegrees = degrees;
+      _unavailable = false;
+    });
   }
 
   @override
   void dispose() {
+    _readingTimeout?.cancel();
     _accelSubscription?.cancel();
     _magSubscription?.cancel();
     super.dispose();

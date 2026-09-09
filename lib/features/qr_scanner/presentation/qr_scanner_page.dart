@@ -26,7 +26,7 @@ class _QrScannerPageState extends State<QrScannerPage> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    _cameraAction(_controller.dispose);
     super.dispose();
   }
 
@@ -36,12 +36,25 @@ class _QrScannerPageState extends State<QrScannerPage> {
     final String? value = capture.barcodes.first.rawValue;
     if (value == null || value.isEmpty) return;
     setState(() => _result = value);
-    _controller.stop();
+    _cameraAction(_controller.stop);
+  }
+
+  Future<void> _cameraAction(Future<void> Function() action) async {
+    try {
+      await action();
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('کنترل دوربین ممکن نشد. دوباره تلاش کنید.'),
+        ),
+      );
+    }
   }
 
   void _rescan() {
     setState(() => _result = null);
-    _controller.start();
+    _cameraAction(_controller.start);
   }
 
   @override
@@ -54,7 +67,7 @@ class _QrScannerPageState extends State<QrScannerPage> {
       actions: [
         IconButton(
           key: const Key('qr_torch_action'),
-          onPressed: () => _controller.toggleTorch(),
+          onPressed: () => _cameraAction(_controller.toggleTorch),
           tooltip: 'چراغ‌قوه',
           icon: const Icon(Icons.flashlight_on_rounded),
         ),
@@ -65,7 +78,20 @@ class _QrScannerPageState extends State<QrScannerPage> {
         builder: (context) => Stack(
           fit: StackFit.expand,
           children: [
-            MobileScanner(controller: _controller, onDetect: _handleDetect),
+            MobileScanner(
+              controller: _controller,
+              onDetect: _handleDetect,
+              useAppLifecycleState: _result == null,
+              errorBuilder: (context, error) => const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Text(
+                    'دوربین در دسترس نیست. دسترسی دوربین را بررسی کنید و دوباره ابزار را باز کنید.',
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ),
             const ScannerFrameOverlay(),
             if (_result != null)
               _QrResultPanel(value: _result!, onRescan: _rescan),
@@ -117,9 +143,9 @@ class _QrResultPanel extends StatelessWidget {
                   onPressed: () async {
                     await Clipboard.setData(ClipboardData(text: value));
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('کپی شد.')),
-                      );
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(const SnackBar(content: Text('کپی شد.')));
                     }
                   },
                   icon: const Icon(Icons.copy_rounded),
@@ -128,13 +154,13 @@ class _QrResultPanel extends StatelessWidget {
                 OutlinedButton.icon(
                   onPressed: () async {
                     try {
-                      await SharePlus.instance.share(
-                        ShareParams(text: value),
-                      );
+                      await SharePlus.instance.share(ShareParams(text: value));
                     } catch (_) {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('اشتراک‌گذاری ممکن نشد.')),
+                          const SnackBar(
+                            content: Text('اشتراک‌گذاری ممکن نشد.'),
+                          ),
                         );
                       }
                     }
@@ -152,13 +178,17 @@ class _QrResultPanel extends StatelessWidget {
                         );
                         if (!launched && context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('باز کردن پیوند ممکن نشد.')),
+                            const SnackBar(
+                              content: Text('باز کردن پیوند ممکن نشد.'),
+                            ),
                           );
                         }
                       } catch (_) {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('باز کردن پیوند ممکن نشد.')),
+                            const SnackBar(
+                              content: Text('باز کردن پیوند ممکن نشد.'),
+                            ),
                           );
                         }
                       }

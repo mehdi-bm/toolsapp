@@ -20,7 +20,8 @@ class SoundMeterPage extends StatefulWidget {
   State<SoundMeterPage> createState() => _SoundMeterPageState();
 }
 
-class _SoundMeterPageState extends State<SoundMeterPage> {
+class _SoundMeterPageState extends State<SoundMeterPage>
+    with WidgetsBindingObserver {
   final NoiseMeter _noiseMeter = NoiseMeter();
   StreamSubscription<NoiseReading>? _subscription;
   double? _currentDb;
@@ -28,7 +29,19 @@ class _SoundMeterPageState extends State<SoundMeterPage> {
   bool _isRunning = false;
   bool _errorState = false;
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) _stop();
+  }
+
   Future<void> _start() async {
+    if (_subscription != null) return;
     setState(() => _errorState = false);
     try {
       _subscription = _noiseMeter.noise.listen(
@@ -73,6 +86,7 @@ class _SoundMeterPageState extends State<SoundMeterPage> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _subscription?.cancel();
     super.dispose();
   }
@@ -109,21 +123,33 @@ class _SoundMeterPageState extends State<SoundMeterPage> {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Text(
-            'دسترسی به میکروفون ممکن نشد.',
-            textAlign: TextAlign.center,
-            style: theme.textTheme.titleMedium,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'دسترسی به میکروفون ممکن نشد.',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleMedium,
+              ),
+              const SizedBox(height: 16),
+              FilledButton(onPressed: _start, child: const Text('تلاش دوباره')),
+            ],
           ),
         ),
       );
     }
 
     final double displayDb = _currentDb ?? _kMinDb;
-    final double fraction = ((displayDb - _kMinDb) / (_kMaxDb - _kMinDb))
-        .clamp(0, 1);
+    final double fraction = ((displayDb - _kMinDb) / (_kMaxDb - _kMinDb)).clamp(
+      0,
+      1,
+    );
+    final bool dark = theme.brightness == Brightness.dark;
     final Color meterColor = fraction < 0.5
-        ? Colors.green
-        : (fraction < 0.8 ? Colors.orange : Colors.red);
+        ? (dark ? Colors.green.shade300 : Colors.green.shade700)
+        : fraction < 0.8
+        ? (dark ? Colors.orange.shade300 : Colors.orange.shade800)
+        : (dark ? Colors.red.shade300 : Colors.red.shade700);
 
     return Padding(
       padding: const EdgeInsets.all(24),

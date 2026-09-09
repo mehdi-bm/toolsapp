@@ -23,6 +23,7 @@ import '../constants/tool_catalog.dart';
 import '../widgets/tool_placeholder_page.dart';
 
 void openTool(BuildContext context, ToolItem tool) {
+  FocusManager.instance.primaryFocus?.unfocus();
   context.read<RecentToolsCubit>().recordUsed(tool.id);
   Navigator.of(
     context,

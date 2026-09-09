@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../core/constants/tool_catalog.dart';
 import '../../../core/widgets/tool_scaffold.dart';
+import '../domain/wifi_qr.dart';
 
 enum _QrContentType { text, url, phone, email, wifi }
 
@@ -33,11 +35,11 @@ class _QrGeneratorPageState extends State<QrGeneratorPage> {
   final GlobalKey _qrBoundaryKey = GlobalKey();
   final TextEditingController _primaryController = TextEditingController();
   final TextEditingController _ssidController = TextEditingController();
-  final TextEditingController _wifiPasswordController =
-      TextEditingController();
+  final TextEditingController _wifiPasswordController = TextEditingController();
 
   _QrContentType _type = _QrContentType.text;
   String _wifiSecurity = 'WPA';
+  bool _exporting = false;
 
   @override
   void dispose() {
@@ -64,29 +66,38 @@ class _QrGeneratorPageState extends State<QrGeneratorPage> {
         final String raw = _primaryController.text.trim();
         return raw.isEmpty ? '' : 'mailto:$raw';
       case _QrContentType.wifi:
-        final String ssid = _ssidController.text.trim();
-        if (ssid.isEmpty) return '';
-        final String password = _wifiPasswordController.text;
-        return 'WIFI:T:$_wifiSecurity;S:$ssid;P:$password;;';
+        return buildWifiQr(
+          ssid: _ssidController.text,
+          password: _wifiPasswordController.text,
+          security: _wifiSecurity,
+        );
     }
   }
 
   Future<Uint8List?> _renderPng() async {
+    await WidgetsBinding.instance.endOfFrame;
+    if (!mounted) return null;
     final RenderRepaintBoundary? boundary =
         _qrBoundaryKey.currentContext?.findRenderObject()
             as RenderRepaintBoundary?;
     if (boundary == null) return null;
     final ui.Image image = await boundary.toImage(pixelRatio: 3);
-    final ByteData? byteData = await image.toByteData(
-      format: ui.ImageByteFormat.png,
-    );
-    return byteData?.buffer.asUint8List();
+    try {
+      final ByteData? byteData = await image.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
+      return byteData?.buffer.asUint8List();
+    } finally {
+      image.dispose();
+    }
   }
 
   Future<void> _saveImage() async {
-    final Uint8List? bytes = await _renderPng();
-    if (bytes == null || !mounted) return;
+    if (_exporting) return;
+    setState(() => _exporting = true);
     try {
+      final Uint8List? bytes = await _renderPng();
+      if (bytes == null || !mounted) return;
       await Gal.putImageBytes(
         bytes,
         name: 'qr_${DateTime.now().millisecondsSinceEpoch}',
@@ -100,18 +111,20 @@ class _QrGeneratorPageState extends State<QrGeneratorPage> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('ذخیرهٔ تصویر ممکن نشد.')));
+    } finally {
+      if (mounted) setState(() => _exporting = false);
     }
   }
 
   Future<void> _shareImage() async {
-    final Uint8List? bytes = await _renderPng();
-    if (bytes == null) return;
+    if (_exporting) return;
+    setState(() => _exporting = true);
     try {
+      final Uint8List? bytes = await _renderPng();
+      if (bytes == null || !mounted) return;
       await SharePlus.instance.share(
         ShareParams(
-          files: [
-            XFile.fromData(bytes, mimeType: 'image/png', name: 'qr.png'),
-          ],
+          files: [XFile.fromData(bytes, mimeType: 'image/png', name: 'qr.png')],
         ),
       );
     } catch (_) {
@@ -119,6 +132,8 @@ class _QrGeneratorPageState extends State<QrGeneratorPage> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('اشتراک‌گذاری ممکن نشد.')));
+    } finally {
+      if (mounted) setState(() => _exporting = false);
     }
   }
 
@@ -137,6 +152,10 @@ class _QrGeneratorPageState extends State<QrGeneratorPage> {
     final ThemeData theme = Theme.of(context);
     final ToolItem tool = kToolsById['qr_generator']!;
     final String data = _buildQrData();
+    final bool valid =
+        data.isNotEmpty &&
+        utf8.encode(data).length <= 2000 &&
+        QrValidator.validate(data: data).isValid;
 
     return ToolScaffold(
       tool: tool,
@@ -162,11 +181,13 @@ class _QrGeneratorPageState extends State<QrGeneratorPage> {
             ..._buildFields(),
             const SizedBox(height: 20),
             Center(
-              child: data.isEmpty
+              child: !valid
                   ? Padding(
                       padding: const EdgeInsets.symmetric(vertical: 32),
                       child: Text(
-                        'برای مشاهدهٔ QR، اطلاعات را وارد کنید.',
+                        data.isEmpty
+                            ? 'برای مشاهدهٔ QR، اطلاعات را وارد کنید.'
+                            : 'متن برای ساخت QR بیش از حد طولانی است؛ آن را کوتاه کنید.',
                         style: theme.textTheme.bodyMedium,
                       ),
                     )
@@ -191,12 +212,12 @@ class _QrGeneratorPageState extends State<QrGeneratorPage> {
               children: [
                 OutlinedButton.icon(
                   key: const Key('qr_gen_save_action'),
-                  onPressed: data.isEmpty ? null : _saveImage,
+                  onPressed: !valid || _exporting ? null : _saveImage,
                   icon: const Icon(Icons.download_rounded),
                   label: const Text('ذخیره تصویر'),
                 ),
                 OutlinedButton.icon(
-                  onPressed: data.isEmpty ? null : _shareImage,
+                  onPressed: !valid || _exporting ? null : _shareImage,
                   icon: const Icon(Icons.share_rounded),
                   label: const Text('اشتراک‌گذاری'),
                 ),

@@ -1,17 +1,20 @@
-# toolbax
+# جعبه‌ابزار پارسیک
 
-A new Flutter project.
+اپ Flutter فارسی شامل ۱۷ ابزار کاربردی با RTL، فونت وزیرمتن، تم روشن/تاریک، جستجو و علاقه‌مندی‌ها.
 
-## Getting Started
+## اجرا و بررسی
 
-This project is a starting point for a Flutter application.
+```powershell
+flutter pub get
+flutter run
+flutter analyze
+flutter test
+```
 
-A few resources to get you started if this is your first Flutter project:
+هدف انتشار فعلی Android است؛ وجود پوشه‌های سایر پلتفرم‌ها به معنی تأیید ابزارهای سخت‌افزاری روی آن‌ها نیست.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+[راهنمای ساخت و انتشار در کافه‌بازار](docs/BAZAAR_RELEASE_FA.md) شامل متن فروشگاه، تنظیمات امضا و کنترل‌های قبل از ارسال است.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+پیکربندی تبلیغات و پشتیبانی از `--dart-define-from-file=ads.local.json` خوانده می‌شود. فایل محلی و کلید امضا نباید وارد مخزن شوند. بدون پیکربندی، ابزارهای محلی قابل استفاده‌اند.
+
+تصاویر بررسی جاری در `artifacts/audit/` نگهداری می‌شوند.

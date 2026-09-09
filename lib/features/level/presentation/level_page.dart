@@ -22,6 +22,7 @@ class _LevelPageState extends State<LevelPage> {
       getIt<LevelCalibrationRepository>();
 
   StreamSubscription<AccelerometerEvent>? _subscription;
+  Timer? _readingTimeout;
 
   double _rawRoll = 0;
   double _rawPitch = 0;
@@ -38,6 +39,9 @@ class _LevelPageState extends State<LevelPage> {
     super.initState();
     _rollOffset = _repository.getRollOffset();
     _pitchOffset = _repository.getPitchOffset();
+    _readingTimeout = Timer(const Duration(seconds: 5), () {
+      if (mounted && !_hasReading) setState(() => _sensorUnavailable = true);
+    });
 
     _subscription =
         accelerometerEventStream(
@@ -51,6 +55,7 @@ class _LevelPageState extends State<LevelPage> {
               _rawRoll = roll;
               _rawPitch = pitch;
               _hasReading = true;
+              _sensorUnavailable = false;
             });
           },
           onError: (Object _) {
@@ -63,6 +68,7 @@ class _LevelPageState extends State<LevelPage> {
 
   @override
   void dispose() {
+    _readingTimeout?.cancel();
     _subscription?.cancel();
     super.dispose();
   }
@@ -87,7 +93,7 @@ class _LevelPageState extends State<LevelPage> {
           'کالیبره کردن را بزنید.',
       actions: [
         IconButton(
-          onPressed: _sensorUnavailable ? null : _calibrate,
+          onPressed: _sensorUnavailable || !_hasReading ? null : _calibrate,
           tooltip: 'کالیبره کردن',
           icon: const Icon(Icons.center_focus_strong_rounded),
         ),

@@ -54,7 +54,7 @@ class _RandomGeneratorPageState extends State<RandomGeneratorPage> {
 
     return ToolScaffold(
       tool: tool,
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -68,6 +68,7 @@ class _RandomGeneratorPageState extends State<RandomGeneratorPage> {
               child: SelectableText(
                 key: const Key('random_code_display'),
                 _code,
+                textDirection: TextDirection.ltr,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontFamily: 'monospace',

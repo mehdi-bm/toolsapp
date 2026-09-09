@@ -23,6 +23,7 @@ class _PermissionGateState extends State<PermissionGate>
     with WidgetsBindingObserver {
   PermissionStatus _status = PermissionStatus.denied;
   bool _checking = true;
+  bool _requesting = false;
 
   @override
   void initState() {
@@ -56,11 +57,17 @@ class _PermissionGateState extends State<PermissionGate>
   }
 
   Future<void> _requestPermission() async {
-    final PermissionStatus status = await _safeCall(
-      () => widget.permission.request(),
-    );
-    if (!mounted) return;
-    setState(() => _status = status);
+    if (_requesting) return;
+    setState(() => _requesting = true);
+    try {
+      // A human answering the system dialog must not be timed out after 5s.
+      final status = await widget.permission.request();
+      if (mounted) setState(() => _status = status);
+    } catch (_) {
+      if (mounted) await _refreshStatus();
+    } finally {
+      if (mounted) setState(() => _requesting = false);
+    }
   }
 
   Future<PermissionStatus> _safeCall(
@@ -87,30 +94,38 @@ class _PermissionGateState extends State<PermissionGate>
     final bool permanentlyDenied = _status.isPermanentlyDenied;
 
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(widget.copy.icon, size: 48, color: theme.colorScheme.primary),
-            const SizedBox(height: 16),
-            Text(
-              permanentlyDenied
-                  ? widget.copy.permanentlyDeniedMessage
-                  : widget.copy.deniedMessage,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            FilledButton(
-              key: const Key('permission_action'),
-              onPressed: permanentlyDenied
-                  ? openAppSettings
-                  : _requestPermission,
-              child: Text(
-                permanentlyDenied ? 'باز کردن تنظیمات' : 'درخواست دسترسی',
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                widget.copy.icon,
+                size: 48,
+                color: theme.colorScheme.primary,
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              Text(
+                permanentlyDenied
+                    ? widget.copy.permanentlyDeniedMessage
+                    : widget.copy.deniedMessage,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              FilledButton(
+                key: const Key('permission_action'),
+                onPressed: _requesting
+                    ? null
+                    : permanentlyDenied
+                    ? openAppSettings
+                    : _requestPermission,
+                child: Text(
+                  permanentlyDenied ? 'باز کردن تنظیمات' : 'درخواست دسترسی',
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

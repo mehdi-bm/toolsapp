@@ -10,8 +10,5 @@ String generateRandomCode({
 }) {
   if (length <= 0) return '';
   final String pool = alphanumeric ? kAlphanumericChars : kNumericChars;
-  return List.generate(
-    length,
-    (_) => pool[random.nextInt(pool.length)],
-  ).join();
+  return List.generate(length, (_) => pool[random.nextInt(pool.length)]).join();
 }

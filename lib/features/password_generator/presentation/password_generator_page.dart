@@ -82,6 +82,9 @@ class _PasswordGeneratorPageState extends State<PasswordGeneratorPage> {
                 _password.isEmpty
                     ? 'حداقل یک نوع کاراکتر را انتخاب کنید.'
                     : _password,
+                textDirection: _password.isEmpty
+                    ? TextDirection.rtl
+                    : TextDirection.ltr,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontFamily: 'monospace',
