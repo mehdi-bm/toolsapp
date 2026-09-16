@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../constants/tool_catalog.dart';
+import '../theme/app_colors.dart';
 
 class ToolCard extends StatelessWidget {
   const ToolCard({
@@ -21,14 +22,14 @@ class ToolCard extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     return SizedBox(
-      width: 156,
+      width: 142,
       child: Card(
         child: InkWell(
           key: Key('tool_card_${tool.id}'),
           borderRadius: BorderRadius.circular(16),
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -37,17 +38,15 @@ class ToolCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(7),
+                      padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withValues(
-                          alpha: 0.1,
-                        ),
+                        color: AppColors.primary.withValues(alpha: 0.14),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         tool.icon,
-                        color: theme.colorScheme.primary,
-                        size: 22,
+                        color: AppColors.primary,
+                        size: 20,
                       ),
                     ),
                     IconButton(
@@ -69,16 +68,16 @@ class ToolCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 Text(
                   tool.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   tool.description,
                   maxLines: 2,

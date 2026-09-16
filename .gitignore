@@ -34,6 +34,8 @@ migrate_working_dir/
 /coverage/
 android/build/
 android/app/.cxx/
+# Gradle build output for the vendored ffmpeg_kit_audio_flutter module.
+third_party/ffmpeg_kit_audio_flutter/android/build/
 
 # Symbolication related
 app.*.symbols

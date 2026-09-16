@@ -12,6 +12,12 @@
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="29"
         tools:replace="android:maxSdkVersion"/>
+    <!-- Needed for the app-sharing/APK-extractor tool to list every
+         installed app on Android 11+ (targeted, per-package <queries>
+         declarations don't work for "browse everything installed"). -->
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission"/>
     <application
         android:label="جعبه‌ابزار پارسیک"
         android:name="${applicationName}"

@@ -5,12 +5,16 @@ import '../../features/advertising/data/advertising_service.dart';
 import '../../features/advertising/data/install_id_repository.dart';
 import '../../features/advertising/domain/advertising_gateway.dart';
 import '../../features/app_support/data/app_support_service.dart';
+import '../../features/audio_converter/data/audio_conversion_history_repository.dart';
 import '../../features/app_support/domain/app_support_gateway.dart';
 import '../../features/favorites/data/favorites_repository.dart';
+import '../../features/image_compressor/data/image_compression_history_repository.dart';
 import '../../features/home/data/recent_tools_repository.dart';
 import '../../features/level/data/level_calibration_repository.dart';
 import '../../features/ruler/data/ruler_calibration_repository.dart';
 import '../../features/settings/data/settings_repository.dart';
+import '../../features/speed_test/data/speed_test_history_repository.dart';
+import '../../features/video_compressor/data/compression_history_repository.dart';
 import '../config/ads_config.dart';
 import '../config/ads_runtime_config.dart';
 import '../network/http_transport.dart';
@@ -36,6 +40,18 @@ Future<void> setupServiceLocator() async {
   );
   getIt.registerLazySingleton<SettingsRepository>(
     () => SettingsRepository(getIt<SharedPreferences>()),
+  );
+  getIt.registerLazySingleton<CompressionHistoryRepository>(
+    () => CompressionHistoryRepository(getIt<SharedPreferences>()),
+  );
+  getIt.registerLazySingleton<AudioConversionHistoryRepository>(
+    () => AudioConversionHistoryRepository(getIt<SharedPreferences>()),
+  );
+  getIt.registerLazySingleton<ImageCompressionHistoryRepository>(
+    () => ImageCompressionHistoryRepository(getIt<SharedPreferences>()),
+  );
+  getIt.registerLazySingleton<SpeedTestHistoryRepository>(
+    () => SpeedTestHistoryRepository(getIt<SharedPreferences>()),
   );
 
   // Shared transport for every Parsik API call (banners, clicks, error

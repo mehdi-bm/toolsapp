@@ -84,7 +84,22 @@ dependencies:
   # Text-to-speech / speech-to-text tool
   flutter_tts: ^4.2.5
   speech_to_text: ^7.4.0
+  light_compressor_v2: ^1.9.1
+  image_picker: ^1.2.3
 
+  # Audio format conversion: the only realistic no-Android-encoder-gap route
+  # to real MP3 output (Android's MediaCodec can decode MP3 but never had an
+  # encoder). Uses the upstream "audio" flavor specifically (LGPL — excludes
+  # x264/x265/xvidcore/vid.stab, the 4 libraries in ffmpeg-kit that are GPL),
+  # so no GPL taint for a closed-source app. Pinned via a vendored local copy
+  # (see dependency_overrides below) because the published package hardcodes
+  # compileSdkVersion 33, which now fails against newer androidx transitive
+  # deps that require 34+.
+  ffmpeg_kit_audio_flutter: ^1.1.0
+  file_picker: ^13.1.0
+  flutter_image_compress: ^2.5.1
+  connectivity_plus: ^7.3.1
+  archive: ^4.3.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -164,3 +179,9 @@ flutter_launcher_icons:
   adaptive_icon_foreground: "assets/icon/icon_foreground.png"
   adaptive_icon_foreground_inset: 20
   min_sdk_android: 21
+
+# Locally-patched copy of ffmpeg_kit_audio_flutter — see the dependency
+# comment above for why.
+dependency_overrides:
+  ffmpeg_kit_audio_flutter:
+    path: third_party/ffmpeg_kit_audio_flutter

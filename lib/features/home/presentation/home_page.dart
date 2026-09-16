@@ -224,13 +224,13 @@ class _ToolRow extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         SizedBox(
-          height: 110 + MediaQuery.textScalerOf(context).scale(58),
+          height: 98 + MediaQuery.textScalerOf(context).scale(50),
           child: BlocBuilder<FavoritesCubit, Set<String>>(
             builder: (context, favoriteIds) {
               return ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: tools.length,
-                separatorBuilder: (_, _) => const SizedBox(width: 12),
+                separatorBuilder: (_, _) => const SizedBox(width: 10),
                 itemBuilder: (context, index) {
                   final ToolItem tool = tools[index];
                   return ToolCard(

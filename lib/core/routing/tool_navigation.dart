@@ -18,7 +18,12 @@ import '../../features/sound_meter/presentation/sound_meter_page.dart';
 import '../../features/speech_text_converter/presentation/speech_text_converter_page.dart';
 import '../../features/text_case_converter/presentation/text_case_converter_page.dart';
 import '../../features/text_cleaner/presentation/text_cleaner_page.dart';
+import '../../features/app_sharing/presentation/app_sharing_page.dart';
+import '../../features/audio_converter/presentation/audio_converter_page.dart';
+import '../../features/image_compressor/presentation/image_compressor_page.dart';
+import '../../features/speed_test/presentation/speed_test_page.dart';
 import '../../features/text_counter/presentation/text_counter_page.dart';
+import '../../features/video_compressor/presentation/video_compressor_page.dart';
 import '../constants/tool_catalog.dart';
 import '../widgets/tool_placeholder_page.dart';
 
@@ -66,6 +71,16 @@ Widget _buildToolPage(ToolItem tool) {
       return const TextCaseConverterPage();
     case 'text_cleaner':
       return const TextCleanerPage();
+    case 'video_compressor':
+      return const VideoCompressorPage();
+    case 'audio_converter':
+      return const AudioConverterPage();
+    case 'image_compressor':
+      return const ImageCompressorPage();
+    case 'speed_test':
+      return const SpeedTestPage();
+    case 'app_sharing':
+      return const AppSharingPage();
     default:
       return ToolPlaceholderPage(tool: tool);
   }

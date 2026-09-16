@@ -5,7 +5,8 @@ enum ToolCategory {
   cameraScanner('دوربین و اسکن'),
   device('ابزار دستگاه'),
   security('امنیت'),
-  text('متن');
+  text('متن'),
+  media('رسانه و فایل');
 
   const ToolCategory(this.label);
 
@@ -147,6 +148,41 @@ const List<ToolItem> kAllTools = [
     title: 'پاکسازی متن',
     description: 'حذف فاصله و خط خالی اضافی',
     icon: Icons.cleaning_services_rounded,
+  ),
+  ToolItem(
+    id: 'video_compressor',
+    category: ToolCategory.media,
+    title: 'فشرده‌سازی ویدیو',
+    description: 'کاهش حجم ویدیو با حفظ کیفیت قابل قبول',
+    icon: Icons.video_settings_rounded,
+  ),
+  ToolItem(
+    id: 'audio_converter',
+    category: ToolCategory.media,
+    title: 'تبدیل فرمت صدا',
+    description: 'تبدیل فایل صوتی بین MP3، WAV، M4A و AAC',
+    icon: Icons.audiotrack_rounded,
+  ),
+  ToolItem(
+    id: 'image_compressor',
+    category: ToolCategory.media,
+    title: 'فشرده‌سازی عکس',
+    description: 'کاهش حجم عکس برای ارسال آسان‌تر',
+    icon: Icons.photo_size_select_large_rounded,
+  ),
+  ToolItem(
+    id: 'speed_test',
+    category: ToolCategory.device,
+    title: 'تست سرعت اینترنت',
+    description: 'اندازه‌گیری سرعت دانلود، آپلود و پینگ',
+    icon: Icons.speed_rounded,
+  ),
+  ToolItem(
+    id: 'app_sharing',
+    category: ToolCategory.media,
+    title: 'اشتراک برنامه‌ها',
+    description: 'استخراج و ارسال فایل APK برنامه‌های نصب‌شده',
+    icon: Icons.apps_rounded,
   ),
 ];
 
