@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/constants/app_info.dart';
 import '../../app_support/presentation/advertising_request_page.dart';
 import '../../app_support/presentation/error_report_page.dart';
+import '../../other_apps/presentation/other_apps_page.dart';
 import 'about_page.dart';
 import 'privacy_policy_page.dart';
 import 'settings_cubit.dart';
@@ -152,6 +153,17 @@ class SettingsPage extends StatelessWidget {
                 onTap: () => Navigator.of(
                   context,
                 ).push(MaterialPageRoute(builder: (_) => const AboutPage())),
+              ),
+              ListTile(
+                key: const Key('settings_other_apps_entry'),
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.grid_view_rounded),
+                title: const Text('اپلیکیشن‌های کاربردی دیگر'),
+                subtitle: const Text('محصولات دیگر پارسیک در کافه‌بازار'),
+                trailing: const Icon(Icons.chevron_left_rounded),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const OtherAppsPage()),
+                ),
               ),
               ListTile(
                 contentPadding: EdgeInsets.zero,

@@ -543,6 +543,34 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('Settings: other Parsik apps page opens with Bazaar apps', (
+    WidgetTester tester,
+  ) async {
+    await _pumpApp(tester);
+    await tester.tap(find.byKey(const Key('nav_settings')));
+    await tester.pumpAndSettle();
+
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('settings_other_apps_entry')),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('settings_other_apps_entry')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('other_apps_grid')), findsOneWidget);
+    expect(
+      find.byKey(const Key('other_app_ir.parsikhesab.habitino')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('other_app_ir.parsik.hesabyar')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Home does not crash with the (unconfigured, in tests) ad '
       'banner wired in, and pull-to-refresh works', (
     WidgetTester tester,
