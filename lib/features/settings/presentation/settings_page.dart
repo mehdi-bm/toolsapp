@@ -158,7 +158,7 @@ class SettingsPage extends StatelessWidget {
                 key: const Key('settings_other_apps_entry'),
                 contentPadding: EdgeInsets.zero,
                 leading: const Icon(Icons.grid_view_rounded),
-                title: const Text('اپلیکیشن‌های کاربردی دیگر'),
+                title: const Text('سایر اپلیکیشن‌های کاربردی'),
                 subtitle: const Text('محصولات دیگر پارسیک در کافه‌بازار'),
                 trailing: const Icon(Icons.chevron_left_rounded),
                 onTap: () => Navigator.of(context).push(

@@ -47,7 +47,7 @@ class OtherAppsPage extends StatelessWidget {
     final ColorScheme colors = Theme.of(context).colorScheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('اپلیکیشن‌های کاربردی دیگر')),
+      appBar: AppBar(title: const Text('سایر اپلیکیشن‌های کاربردی')),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {

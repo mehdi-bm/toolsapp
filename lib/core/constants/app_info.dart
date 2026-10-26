@@ -1,8 +1,9 @@
 /// Keep in sync with the `version:` field in pubspec.yaml.
-const String kAppVersion = '1.0.0';
+const String kAppVersion = '1.0.2';
 const String kBazaarUrl = 'https://cafebazaar.ir/app/com.parsik.toolbax';
 
-const String kContactEmail = 'devteam.parsikhesab@gmail.com';
+const String kContactEmail = 'parsikhesab@gmail.com';
+const String kDeveloperName = 'پارسیک حساب';
 
 /// Keep in sync with android:label in AndroidManifest.xml and the
 /// `description:` field in pubspec.yaml, which can't reference this

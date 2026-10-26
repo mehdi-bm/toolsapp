@@ -40,6 +40,12 @@ class AboutPage extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
+            'توسعه‌دهنده: $kDeveloperName',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.titleMedium,
+          ),
+          const SizedBox(height: 16),
+          Text(
             'نسخه $kAppVersion',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,

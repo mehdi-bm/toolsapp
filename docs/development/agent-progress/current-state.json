@@ -1,0 +1,33 @@
+{
+  "taskId": "TOOLBOX-UX-01",
+  "updatedAt": "2026-10-26T14:02:00+03:30",
+  "timezone": "Asia/Tehran",
+  "agent": "Codex",
+  "project": "toolsapp",
+  "repository": "https://github.com/mehdi-bm/toolsapp",
+  "remote": "origin",
+  "branch": "codex/toolbox-home-and-identity",
+  "baseHead": "bdab912fdb20909adfe85793678f6016dc0d4e61",
+  "worktree": "D:/SourceCode/worktrees/toolbox-home-and-identity",
+  "status": "TECHNICALLY_COMPLETE_AWAITING_USER_REVIEW",
+  "evidence": "docs/development/toolbox-home-identity-20261026.fa.md",
+  "contactEmailAuthority": "User explicitly supplied parsikhesab@gmail.com in this task",
+  "accepted": false,
+  "validation": {
+    "analysis": "PASS",
+    "focusedTestsPassed": 34,
+    "focusedTestsFailed": 0,
+    "trackedDependencyLockUnchanged": true,
+    "sdkResolutionLimitation": "Current Flutter 3.47.5 requires five newer SDK-pinned dependencies for local validation; details in evidence",
+    "deviceIntegration": "NOT_RUN"
+  },
+  "accountingRoadmap": {
+    "applicable": false,
+    "reason": "Independent toolbox app; no distribution roadmap stage changed"
+  },
+  "commit": { "status": "not_authorized", "sha": null },
+  "push": { "status": "not_authorized", "remoteVerified": false },
+  "deployment": "not_performed",
+  "ownerPublishCheckoutModified": false,
+  "nextAction": "User review of this isolated delivery; no commit, push, publication or application launch without the corresponding authorization."
+}

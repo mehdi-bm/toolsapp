@@ -6,6 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:toolbax/core/services/service_locator.dart';
 import 'package:toolbax/core/utils/persian_numbers.dart';
+import 'package:toolbax/features/other_apps/domain/parsik_app.dart';
+import 'package:toolbax/features/other_apps/presentation/other_apps_page.dart';
 import 'package:toolbax/main.dart';
 
 Future<void> _pumpApp(WidgetTester tester) async {
@@ -39,7 +41,7 @@ void main() {
     await _pumpApp(tester);
 
     expect(find.text('جعبه‌ابزار پارسیک'), findsOneWidget);
-    expect(find.text('خط‌کش'), findsOneWidget);
+    expect(find.text('تولید رمز'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('nav_favorites')));
     await tester.pumpAndSettle();
@@ -77,7 +79,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('خط‌کش'), findsOneWidget);
+    expect(find.text('تولید رمز'), findsOneWidget);
   });
 
   testWidgets('Search filters tools by Persian title and shows a message '
@@ -103,6 +105,7 @@ void main() {
       'tab', (WidgetTester tester) async {
     await _pumpApp(tester);
 
+    await _scrollToToolCard(tester, 'ruler');
     await tester.tap(find.byKey(const Key('favorite_toggle_ruler')));
     await tester.pumpAndSettle();
 
@@ -120,6 +123,7 @@ void main() {
       'and saved', (WidgetTester tester) async {
     await _pumpApp(tester);
 
+    await _scrollToToolCard(tester, 'ruler');
     await tester.tap(find.byKey(const Key('tool_card_ruler')));
     await tester.pumpAndSettle();
 
@@ -145,6 +149,7 @@ void main() {
       'throwing', (WidgetTester tester) async {
     await _pumpApp(tester);
 
+    await _scrollToToolCard(tester, 'protractor');
     await tester.tap(find.byKey(const Key('tool_card_protractor')));
     await tester.pumpAndSettle();
 
@@ -167,6 +172,7 @@ void main() {
     WidgetTester tester,
   ) async {
     await _pumpApp(tester);
+    await _scrollToToolCard(tester, 'level');
 
     // pumpAndSettle isn't used here: without a real accelerometer platform
     // channel the tool may sit in its loading state, whose spinner animates
@@ -455,7 +461,7 @@ void main() {
       'Home, and reset restores it', (WidgetTester tester) async {
     await _pumpApp(tester);
 
-    await tester.tap(find.byKey(const Key('tool_card_ruler')));
+    await tester.tap(find.byKey(const Key('tool_card_password_generator')));
     await tester.pumpAndSettle();
     await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
@@ -506,7 +512,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('درباره برنامه'));
     await tester.pumpAndSettle();
-    expect(find.text('نسخه 1.0.0'), findsOneWidget);
+    expect(find.text('نسخه 1.0.2'), findsOneWidget);
+    expect(find.text('توسعه‌دهنده: پارسیک حساب'), findsOneWidget);
     await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
 
@@ -524,8 +531,24 @@ void main() {
     );
   });
 
-  testWidgets('Settings: contact tile fails gracefully without a mail app '
-      'platform channel', (WidgetTester tester) async {
+  testWidgets('Settings: contact uses the official email and falls back '
+      'when no mail app is available', (WidgetTester tester) async {
+    final launched = <Uri>[];
+    const channel = MethodChannel('plugins.flutter.io/url_launcher');
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (
+      call,
+    ) async {
+      if (call.method == 'launch') {
+        launched.add(Uri.parse((call.arguments as Map)['url'] as String));
+      }
+      return false;
+    });
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        channel,
+        null,
+      ),
+    );
     await _pumpApp(tester);
     await tester.tap(find.byKey(const Key('nav_settings')));
     await tester.pumpAndSettle();
@@ -536,11 +559,14 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     await tester.pumpAndSettle();
+    expect(find.text('parsikhesab@gmail.com'), findsOneWidget);
     await tester.tap(find.text('تماس با ما'));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
+    expect(launched.single.scheme, 'mailto');
+    expect(launched.single.path, 'parsikhesab@gmail.com');
+    expect(find.text('ایمیل تماس: parsikhesab@gmail.com'), findsOneWidget);
   });
 
   testWidgets('Settings: other Parsik apps page opens with Bazaar apps', (
@@ -559,17 +585,99 @@ void main() {
     await tester.tap(find.byKey(const Key('settings_other_apps_entry')));
     await tester.pumpAndSettle();
 
+    expect(find.text('سایر اپلیکیشن‌های کاربردی'), findsWidgets);
     expect(find.byKey(const Key('other_apps_grid')), findsOneWidget);
-    expect(
-      find.byKey(const Key('other_app_ir.parsikhesab.habitino')),
-      findsOneWidget,
+    final scrollable = find.descendant(
+      of: find.byKey(const Key('other_apps_scroll_view')),
+      matching: find.byType(Scrollable),
     );
-    expect(
-      find.byKey(const Key('other_app_ir.parsik.hesabyar')),
-      findsOneWidget,
-    );
+    for (final app in kOtherParsikApps) {
+      final card = find.byKey(Key('other_app_${app.packageName}'));
+      await tester.scrollUntilVisible(card, 150, scrollable: scrollable);
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(of: card, matching: find.text(app.name)),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .widget<Image>(
+              find.descendant(of: card, matching: find.byType(Image)),
+            )
+            .image,
+        AssetImage(app.iconAsset),
+      );
+      expect(tester.takeException(), isNull);
+    }
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('Home prioritizes security, text and media before device, '
+      'measurement and camera tools', (tester) async {
+    tester.view.physicalSize = const Size(800, 1800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await _pumpApp(tester);
+
+    double previousY = -1;
+    for (final label in [
+      'امنیت',
+      'متن',
+      'رسانه و فایل',
+      'ابزار دستگاه',
+      'اندازه‌گیری',
+      'دوربین و اسکن',
+    ]) {
+      final y = tester.getTopLeft(find.text(label)).dy;
+      expect(y, greaterThan(previousY));
+      previousY = y;
+    }
+  });
+
+  for (final bazaarResult in ['success', 'unavailable', 'throws']) {
+    testWidgets(
+      'Other apps: Bazaar $bazaarResult uses the correct destination',
+      (tester) async {
+        final launched = <String>[];
+        const channel = MethodChannel('plugins.flutter.io/url_launcher');
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          channel,
+          (call) async {
+            if (call.method != 'launch') return false;
+            final url = (call.arguments as Map)['url'] as String;
+            launched.add(url);
+            if (url.startsWith('bazaar:')) {
+              if (bazaarResult == 'throws') {
+                throw PlatformException(code: 'ACTIVITY_NOT_FOUND');
+              }
+              return bazaarResult == 'success';
+            }
+            return true;
+          },
+        );
+        addTearDown(
+          () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+            channel,
+            null,
+          ),
+        );
+        await tester.pumpWidget(const MaterialApp(home: OtherAppsPage()));
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.byKey(const Key('other_app_ir.parsikhesab.habitino')),
+        );
+        await tester.pumpAndSettle();
+
+        expect(launched, [
+          'bazaar://details?id=ir.parsikhesab.habitino',
+          if (bazaarResult != 'success')
+            'https://cafebazaar.ir/app/ir.parsikhesab.habitino',
+        ]);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
 
   testWidgets('Home does not crash with the (unconfigured, in tests) ad '
       'banner wired in, and pull-to-refresh works', (

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 enum ToolCategory {
-  measurement('اندازه‌گیری'),
-  cameraScanner('دوربین و اسکن'),
-  device('ابزار دستگاه'),
   security('امنیت'),
   text('متن'),
-  media('رسانه و فایل');
+  media('رسانه و فایل'),
+  device('ابزار دستگاه'),
+  measurement('اندازه‌گیری'),
+  cameraScanner('دوربین و اسکن');
 
   const ToolCategory(this.label);
 
